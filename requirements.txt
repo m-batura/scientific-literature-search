@@ -1,0 +1,3 @@
+google-genai
+faiss-cpu~=1.10.0
+beautifulsoup4

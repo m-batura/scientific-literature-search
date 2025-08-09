@@ -23,7 +23,7 @@ query_embedding = get_embedding(input_string, gai)
 query_embedding = np.array(query_embedding).astype('float32').reshape(1, -1)
 
 k = 20
-index = faiss.read_index('../../data/faiss/papers.faiss')
+index = faiss.read_index('../data/faiss/papers.faiss')
 print('vector search')
 distances, indices = index.search(query_embedding, k)
 

@@ -55,9 +55,12 @@ def get_kaznu_paper(path, paper_id, language_code = 'ru_RU'):
         return [title, abstract, citation]
     except requests.exceptions.RequestException as e:
         print(e)
+        time.sleep(0.5)
         return None
+
     except Exception as e:
         print(e)
+        time.sleep(0.5)
         return None
 
 def scrap_kaznu_journal(path, start_id, end_id, client):
@@ -80,7 +83,7 @@ def scrap_kaznu_journal(path, start_id, end_id, client):
 
 if __name__ == "__main__":
     gai = genai.Client(api_key=constants.GEMINI_API_KEY)
-    scrap_kaznu_journal('https://philart.kaznu.kz/index.php/1-FIL/', 4960, 4980, gai)
+    scrap_kaznu_journal('https://philart.kaznu.kz/index.php/1-FIL/', 4900, 4959, gai)
     # dict_to_json = {}
     # paper_list = []
     #

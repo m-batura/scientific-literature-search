@@ -93,6 +93,11 @@ def display_table_content(name, start=0, stop=50):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
+    # Get total number of entries
+    cursor.execute(f"SELECT COUNT(*) FROM {name}")
+    total_entries = cursor.fetchone()[0]
+    print(f"Total entries in '{name}': {total_entries}")
+
     # Fetch column names
     cursor.execute(f"PRAGMA table_info({name})")
     columns = [info[1] for info in cursor.fetchall()]
@@ -178,5 +183,5 @@ def paper_exists(journal_id, paper_id):
 if __name__ == "__main__":
     # add_journal('https://bm.kaznu.kz/index.php/kaznu/')
     #view_table('papers')
-    display_table_content('papers')
+    display_table_content('papers', 50, 100)
     # print(check_journal_by_name('https://bulletin-psysoc.kaznu.kz/index.php/1-psy/'))

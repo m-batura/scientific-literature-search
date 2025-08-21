@@ -46,5 +46,5 @@ def literature_reivew(model, topic):
 
 if __name__ == "__main__":
     gai = genai.Client(api_key=constants.GEMINI_API_KEY)
-    topic = 'влияние искусственного интеллекта на развитие языка\n'
+    topic = 'The problem of clustering a set of points so as to minimize the maximum intercluster distance is studied. An O(kn) approximation algorithm, where n is the number of points and k is the number of clusters, that guarantees solutions with an objective function value within two times the optimal solution value is presented. This approximation algorithm succeeds as long as the set of points satisfies the triangular inequality. We also show that our approximation algorithm is best possible, with respect to the approximation bound, if P ≠ NP.\n'
     literature_reivew(gai, topic)

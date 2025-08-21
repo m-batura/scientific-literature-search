@@ -1,10 +1,10 @@
 import sqlite3
 import json
 
-db_path = '../data/db/sqlite.sqlite'
+db_kaznu_path = '../data/db/kaznu_papers.sqlite'
 
 def create_tables():
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_kaznu_path)
     cursor = conn.cursor()
 
     cursor.execute('''
@@ -31,14 +31,14 @@ def create_tables():
     conn.close()
 
 def fetch_all_tables():
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_kaznu_path)
     cursor = conn.cursor()
 
     cursor.execute('''SELECT name FROM sqlite_master WHERE type='table';''')
     print(cursor.fetchall())
 
 def view_table(table):
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_kaznu_path)
     cursor = conn.cursor()
 
     cursor.execute(f"PRAGMA table_info({table})")
@@ -48,7 +48,7 @@ def view_table(table):
         print(column)
 
 def add_journal(name):
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_kaznu_path)
     cursor = conn.cursor()
 
     # Step 1: Try to insert the journal name (will fail silently if it already exists)
@@ -62,7 +62,7 @@ def add_journal(name):
     conn.close()
 
 def add_paper(journal_id, paper_id, title, annotation, citation, vector_id):
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_kaznu_path)
     cursor = conn.cursor()
 
     try:
@@ -78,7 +78,7 @@ def add_paper(journal_id, paper_id, title, annotation, citation, vector_id):
     conn.close()
 
 def get_journal_id(name):
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_kaznu_path)
     cursor = conn.cursor()
 
     cursor.execute("SELECT id FROM journals WHERE name = ?", (name,))
@@ -90,7 +90,7 @@ def get_journal_id(name):
         return None
 
 def display_table_content(name, start=0, stop=50):
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_kaznu_path)
     cursor = conn.cursor()
 
     # Get total number of entries
@@ -118,7 +118,7 @@ def transfer_papers_from_json():
         data = json.load(file)
 
     i = 0
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_kaznu_path)
     cursor = conn.cursor()
 
     for paper in data["papers"]:
@@ -143,7 +143,7 @@ def transfer_papers_from_json():
     conn.close()
 
 def get_paper_by_embedding_id(vector_id):
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_kaznu_path)
     cursor = conn.cursor()
 
     cursor.execute("SELECT annotation FROM papers WHERE vector_id = ?", (vector_id,))
@@ -152,7 +152,7 @@ def get_paper_by_embedding_id(vector_id):
     return abstract
 
 def check_journal_by_name(name):
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_kaznu_path)
     cursor = conn.cursor()
 
     id = get_journal_id(name)
@@ -170,7 +170,7 @@ def check_journal_by_name(name):
     return id
 
 def paper_exists(journal_id, paper_id):
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_kaznu_path)
     cursor = conn.cursor()
     cursor.execute("""
         SELECT 1 FROM papers WHERE journal_id = ? AND paper_id = ?
@@ -183,5 +183,6 @@ def paper_exists(journal_id, paper_id):
 if __name__ == "__main__":
     # add_journal('https://bm.kaznu.kz/index.php/kaznu/')
     #view_table('papers')
-    display_table_content('papers', 50, 100)
+    display_table_content('journals', 0, 150)
+    #print(get_paper_by_embedding_id(90))
     # print(check_journal_by_name('https://bulletin-psysoc.kaznu.kz/index.php/1-psy/'))

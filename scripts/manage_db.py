@@ -1,10 +1,14 @@
 import sqlite3
 import json
 
-db_kaznu_path = '../data/db/kaznu_papers.sqlite'
+import numpy as np
+
+import manage_faiss as faiss
+
+db_path = '../data/db/db.sqlite'
 
 def create_tables():
-    conn = sqlite3.connect(db_kaznu_path)
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     cursor.execute('''
@@ -31,14 +35,14 @@ def create_tables():
     conn.close()
 
 def fetch_all_tables():
-    conn = sqlite3.connect(db_kaznu_path)
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     cursor.execute('''SELECT name FROM sqlite_master WHERE type='table';''')
     print(cursor.fetchall())
 
 def view_table(table):
-    conn = sqlite3.connect(db_kaznu_path)
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     cursor.execute(f"PRAGMA table_info({table})")
@@ -48,7 +52,7 @@ def view_table(table):
         print(column)
 
 def add_journal(name):
-    conn = sqlite3.connect(db_kaznu_path)
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Step 1: Try to insert the journal name (will fail silently if it already exists)
@@ -61,8 +65,8 @@ def add_journal(name):
 
     conn.close()
 
-def add_paper(journal_id, paper_id, title, annotation, citation, vector_id):
-    conn = sqlite3.connect(db_kaznu_path)
+def add_kaznu_paper(journal_id, paper_id, title, annotation, citation, vector_id):
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     try:
@@ -77,8 +81,37 @@ def add_paper(journal_id, paper_id, title, annotation, citation, vector_id):
         pass
     conn.close()
 
+def add_experiment_paper(faiss_id, link, abstract, client):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+            SELECT 1 FROM experimental WHERE link_to_paper = ?
+        """, (link,))
+
+    result = cursor.fetchone()
+
+
+    if result is not None:
+        conn.close()
+        print("Paper not added")
+        return
+
+    embedding_raw = faiss.get_embedding(abstract, client)
+    embedding = np.array(embedding_raw, dtype='float32').reshape(1, -1)
+    vector_id = faiss.add_to_exper_faiss(embedding)
+
+    cursor.execute("""
+    INSERT INTO experimental (faiss_id, link_to_paper, abstract)
+    VALUES (?, ?, ?)
+    """, (vector_id, link, abstract))
+
+    conn.commit()
+    conn.close()
+
+
 def get_journal_id(name):
-    conn = sqlite3.connect(db_kaznu_path)
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     cursor.execute("SELECT id FROM journals WHERE name = ?", (name,))
@@ -90,7 +123,7 @@ def get_journal_id(name):
         return None
 
 def display_table_content(name, start=0, stop=50):
-    conn = sqlite3.connect(db_kaznu_path)
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Get total number of entries
@@ -118,7 +151,7 @@ def transfer_papers_from_json():
         data = json.load(file)
 
     i = 0
-    conn = sqlite3.connect(db_kaznu_path)
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     for paper in data["papers"]:
@@ -143,7 +176,7 @@ def transfer_papers_from_json():
     conn.close()
 
 def get_paper_by_embedding_id(vector_id):
-    conn = sqlite3.connect(db_kaznu_path)
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     cursor.execute("SELECT annotation FROM papers WHERE vector_id = ?", (vector_id,))
@@ -152,7 +185,7 @@ def get_paper_by_embedding_id(vector_id):
     return abstract
 
 def check_journal_by_name(name):
-    conn = sqlite3.connect(db_kaznu_path)
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     id = get_journal_id(name)
@@ -170,7 +203,7 @@ def check_journal_by_name(name):
     return id
 
 def paper_exists(journal_id, paper_id):
-    conn = sqlite3.connect(db_kaznu_path)
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("""
         SELECT 1 FROM papers WHERE journal_id = ? AND paper_id = ?
@@ -182,7 +215,20 @@ def paper_exists(journal_id, paper_id):
 
 if __name__ == "__main__":
     # add_journal('https://bm.kaznu.kz/index.php/kaznu/')
-    #view_table('papers')
-    display_table_content('journals', 0, 150)
-    #print(get_paper_by_embedding_id(90))
-    # print(check_journal_by_name('https://bulletin-psysoc.kaznu.kz/index.php/1-psy/'))
+    view_table('experimental')
+    #display_table_content('journals', 0, 150)
+    #fetch_all_tables()
+
+    # conn = sqlite3.connect(db_path)
+    # cursor = conn.cursor()
+    #
+    # cursor.execute("""
+    # CREATE TABLE IF NOT EXISTS experimental (
+    #     faiss_id INTEGER PRIMARY KEY,
+    #     link_to_paper TEXT UNIQUE,
+    #     abstract TEXT
+    # )
+    # """)
+    #
+    # conn.commit()
+    # conn.close()

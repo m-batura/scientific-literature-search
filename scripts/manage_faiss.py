@@ -7,7 +7,8 @@ from google.genai import types
 #constants.py - file with api_keys
 import constants
 
-index_path = '../data/faiss/papers.faiss'
+papers_path = '../data/faiss/papers.faiss'
+experimental_path = '../data/faiss/experimental.faiss'
 
 def get_embedding(text_to_embed, client):
     result = client.models.embed_content(
@@ -18,34 +19,23 @@ def get_embedding(text_to_embed, client):
     print('Recieved embedding')
     return result.embeddings[0].values
 
-def add_to_faiss(embedding):
-    index = faiss.read_index(index_path)
+def add_to_exper_faiss(embedding):
+    index = faiss.read_index(experimental_path)
     index.add(embedding)
-    faiss.write_index(index, index_path)
+    faiss.write_index(index, papers_path)
     print("Embeddings added to faiss index")
     return index.ntotal - 1
 
-#if __name__ == "__main__":
-    # json_path = '../../data/json/math.json'
-    # print('Opening JSON')
-    # json_file = open(json_path, encoding='utf-8')
-    # json_data = json.load(json_file)
-    #
-    # entries = json_data['papers'][:]
-    # abstracts = []
-    # for entry in entries:
-    #     abstracts.append(entry['abstract'])
-    #
-    # json_file.close()
-    #
+def add_to_faiss(embedding):
+    index = faiss.read_index(papers_path)
+    index.add(embedding)
+    faiss.write_index(index, papers_path)
+    print("Embeddings added to faiss index")
+    return index.ntotal - 1
+
+if __name__ == "__main__":
     # gai = genai.Client(api_key=constants.GEMINI_API_KEY)
-    #
-    # # list comprehension
-    # print('list comprehension')
-    # embeddings = [get_embedding(abstract, gai) for abstract in abstracts]
-    # embeddings_array = np.array(embeddings).astype('float32')
-    # dimension = embeddings_array.shape[1]
-    #
-    # index = faiss.IndexFlatL2(dimension)
-    # index.add(embeddings_array)
-    # faiss.write_index(index, index_path)
+    # embedding = get_embedding('The article examines the issue of drug clustering. Initially, k classes are arbitrarily formed and theresulting training sample is pre-processed, then the similarities between the objects of each classare evaluated based on the proximity function and the criterion for evaluating the contribution ofobjects to the formation of their own class. Usually, it is in percentage and is the degree of mutualsimilarity of objects of each class. In the next steps of the algorithm, first, one object is takenfrom the first class, and by adding it to all k classes, the contribution of this object to this classis measured. The object will be left in the class which has the most contribution. This processis repeated several times in a row for all objects of the class. The process is stopped when thelocation of objects does not change and the degree of similarity exceeds the required percentage.As a result, the required clusters are formed.', gai)
+    # print(len(embedding))
+    index = faiss.IndexFlatL2(768)
+    faiss.write_index(index, experimental_path)

@@ -4,9 +4,9 @@ import json
 import numpy as np
 from google.genai import types
 
-from manage_faiss import get_embedding
+from faiss_controller import get_embedding
 import constants
-import manage_db as db
+import sqlite_controller as db
 
 def literature_reivew(model, topic):
     # topic = 'Write a related work section based on scientific paper abstracts. \n'

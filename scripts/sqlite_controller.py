@@ -2,37 +2,10 @@ import sqlite3
 import json
 
 import numpy as np
-
-import manage_faiss as faiss
+import faiss_controller
+from scripts import gai_controller
 
 db_path = '../data/db/db.sqlite'
-
-def create_tables():
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS journals (
-        id INTEGER PRIMARY KEY,
-        name TEXT NOT NULL
-    );
-    ''')
-
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS papers (
-        journal_id INTEGER,
-        paper_id TEXT NOT NULL UNIQUE,
-        title TEXT,
-        annotation TEXT,
-        citation TEXT,
-        vector_id INTEGER,
-        FOREIGN KEY (journal_id) REFERENCES journals(id),
-        PRIMARY KEY (journal_id, paper_id)
-    );
-    ''')
-
-    conn.commit()
-    conn.close()
 
 def fetch_all_tables():
     conn = sqlite3.connect(db_path)
@@ -81,34 +54,52 @@ def add_kaznu_paper(journal_id, paper_id, title, annotation, citation, vector_id
         pass
     conn.close()
 
-def add_experiment_paper(faiss_id, link, abstract, client):
+def add_experiment_paper(link, abstract):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
+
+    print('Connected to db')
 
     cursor.execute("""
             SELECT 1 FROM experimental WHERE link_to_paper = ?
         """, (link,))
-
     result = cursor.fetchone()
-
 
     if result is not None:
         conn.close()
-        print("Paper not added")
+        print("paper with that link exists")
         return
 
-    embedding_raw = faiss.get_embedding(abstract, client)
-    embedding = np.array(embedding_raw, dtype='float32').reshape(1, -1)
-    vector_id = faiss.add_to_exper_faiss(embedding)
+    print('paper is unique')
+
+    next_faiss_id = faiss_controller.num_of_vectors(faiss_controller.experimental_path)
+
+    print( f'next faiss id {next_faiss_id}')
+
+    cursor.execute('''SELECT 1 FROM experimental WHERE faiss_id = ?
+        ''', (next_faiss_id,))
+    result = cursor.fetchone()
+
+    if result is not None:
+        conn.close()
+        print("paper with that faiss id exists")
+        return
 
     cursor.execute("""
     INSERT INTO experimental (faiss_id, link_to_paper, abstract)
     VALUES (?, ?, ?)
-    """, (vector_id, link, abstract))
+    """, (next_faiss_id, link, abstract))
+
+    print('db entry added')
+
+    embedding_raw = gai_controller.get_embedding(abstract)
+    embedding = np.array(embedding_raw, dtype='float32').reshape(1, -1)
+    faiss_controller.add_to_faiss(embedding, faiss_controller.experimental_path)
 
     conn.commit()
     conn.close()
 
+    print('sqlite saved')
 
 def get_journal_id(name):
     conn = sqlite3.connect(db_path)
@@ -215,20 +206,45 @@ def paper_exists(journal_id, paper_id):
 
 if __name__ == "__main__":
     # add_journal('https://bm.kaznu.kz/index.php/kaznu/')
-    view_table('experimental')
-    #display_table_content('journals', 0, 150)
+    #view_table('experimental')
+
+    add_experiment_paper('https://doi.org/10.26577/JMMCS2024-v123-i3-4', 'The article examines the issue of drug clustering. Initially, k classes are arbitrarily formed and the resulting training sample is pre-processed, then the similarities between the objects of each class are evaluated based on the proximity function and the criterion for evaluating the contribution of objects to the formation of their own class. Usually, it is in percentage and is the degree of mutual similarity of objects of each class. In the next steps of the algorithm, first, one object is taken from the first class, and by adding it to all k classes, the contribution of this object to this class is measured. The object will be left in the class which has the most contribution. This process is repeated several times in a row for all objects of the class. The process is stopped when the location of objects does not change and the degree of similarity exceeds the required percentage. As a result, the required clusters are formed.')
+
+    #display_table_content('experimental')
     #fetch_all_tables()
 
     # conn = sqlite3.connect(db_path)
     # cursor = conn.cursor()
     #
     # cursor.execute("""
-    # CREATE TABLE IF NOT EXISTS experimental (
-    #     faiss_id INTEGER PRIMARY KEY,
-    #     link_to_paper TEXT UNIQUE,
-    #     abstract TEXT
-    # )
+    #     DELETE FROM experimental
     # """)
+    #
+    # conn.commit()
+    # conn.close()
+
+    # conn = sqlite3.connect(db_path)
+    # cursor = conn.cursor()
+    #
+    # cursor.execute('''
+    #     CREATE TABLE IF NOT EXISTS journals (
+    #         id INTEGER PRIMARY KEY,
+    #         name TEXT NOT NULL
+    #     );
+    #     ''')
+    #
+    # cursor.execute('''
+    #     CREATE TABLE IF NOT EXISTS papers (
+    #         journal_id INTEGER,
+    #         paper_id TEXT NOT NULL UNIQUE,
+    #         title TEXT,
+    #         annotation TEXT,
+    #         citation TEXT,
+    #         vector_id INTEGER,
+    #         FOREIGN KEY (journal_id) REFERENCES journals(id),
+    #         PRIMARY KEY (journal_id, paper_id)
+    #     );
+    #     ''')
     #
     # conn.commit()
     # conn.close()

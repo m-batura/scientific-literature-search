@@ -3,7 +3,7 @@ from google import genai
 
 import constants
 import scrap_papers as sp
-import manage_faiss as faiss
+import faiss_controller as faiss
 
 def cosine_distance(a, b):
     return 1 - np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))

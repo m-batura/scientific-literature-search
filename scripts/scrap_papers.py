@@ -6,9 +6,8 @@ from bs4 import BeautifulSoup
 from google import genai
 
 import constants
-import manage_db as db
-import manage_faiss as faiss
-
+import sqlite_controller as db
+import faiss_controller as faiss
 
 def get_kaznu_paper(path, paper_id, language_code = 'ru_RU'):
     try:
@@ -75,7 +74,7 @@ def scrap_kaznu_journal(path, start_id, end_id, client):
             title, abstract, citation = paper
             embedding_raw = faiss.get_embedding(abstract, client)
             embedding = np.array(embedding_raw, dtype='float32').reshape(1, -1)
-            vector_id = faiss.add_to_faiss(embedding)
+            vector_id = faiss.add_to_faiss(embedding, papers_path)
             db.add_paper(journal_id, paper_id, title, abstract, citation, vector_id)
 
 

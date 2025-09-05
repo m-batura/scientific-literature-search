@@ -1,3 +1,4 @@
+import numpy as np
 from google import genai
 from google.genai import types
 
@@ -12,4 +13,5 @@ def get_embedding(text_to_embed):
         config=types.EmbedContentConfig(task_type="SEMANTIC_SIMILARITY")
     )
     print('received embedding')
-    return result.embeddings[0].values
+    raw_embedding = result.embeddings[0].values
+    return np.array(raw_embedding, dtype='float32').reshape(1, -1)

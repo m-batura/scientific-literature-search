@@ -1,7 +1,6 @@
 import sqlite3
 import json
 
-import numpy as np
 import faiss_controller
 from scripts import gai_controller
 
@@ -92,8 +91,7 @@ def add_experiment_paper(link, abstract):
 
     print('db entry added')
 
-    embedding_raw = gai_controller.get_embedding(abstract)
-    embedding = np.array(embedding_raw, dtype='float32').reshape(1, -1)
+    embedding = gai_controller.get_embedding(abstract)
     faiss_controller.add_to_faiss(embedding, faiss_controller.experimental_path)
 
     conn.commit()
@@ -208,7 +206,7 @@ if __name__ == "__main__":
     # add_journal('https://bm.kaznu.kz/index.php/kaznu/')
     #view_table('experimental')
 
-    add_experiment_paper('https://doi.org/10.26577/JMMCS2024-v123-i3-4', 'The article examines the issue of drug clustering. Initially, k classes are arbitrarily formed and the resulting training sample is pre-processed, then the similarities between the objects of each class are evaluated based on the proximity function and the criterion for evaluating the contribution of objects to the formation of their own class. Usually, it is in percentage and is the degree of mutual similarity of objects of each class. In the next steps of the algorithm, first, one object is taken from the first class, and by adding it to all k classes, the contribution of this object to this class is measured. The object will be left in the class which has the most contribution. This process is repeated several times in a row for all objects of the class. The process is stopped when the location of objects does not change and the degree of similarity exceeds the required percentage. As a result, the required clusters are formed.')
+    add_experiment_paper('https://www.andrewng.org/publications/on-spectral-clustering-analysis-and-an-algorithm/', 'Despite many empirical successes of spectral clustering methods— algorithms that cluster points using eigenvectors of matrices derived from the data—there are several unresolved issues. First, there are a wide variety of algorithms that use the eigenvectors in slightly different ways. Second, many of these algorithms have no proof that they will actually compute a reasonable clustering. In this paper, we present a simple spectral clustering algorithm that can be implemented using a few lines of Matlab. Using tools from matrix perturbation theory, we analyze the algorithm, and give conditions under which it can be expected to do well. We also show surprisingly good experimental results on a number of challenging clustering problems.')
 
     #display_table_content('experimental')
     #fetch_all_tables()

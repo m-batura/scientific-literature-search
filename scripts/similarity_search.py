@@ -1,28 +1,23 @@
-from google import genai
-import faiss
-import json
 import numpy as np
-from google.genai import types
 
-from faiss_controller import get_embedding
+from gai_controller import get_embedding
+import faiss_controller
 import constants
 import sqlite_controller as db
 
-def literature_reivew(model, topic):
+def literature_reivew(topic):
     # topic = 'Write a related work section based on scientific paper abstracts. \n'
     print('get promt embedding')
-    query_embedding = get_embedding(topic, model)
-    query_embedding = np.array(query_embedding).astype('float32').reshape(1, -1)
+    query_embedding = get_embedding(topic)
 
-    k = 20
-    index = faiss.read_index('../data/faiss/papers.faiss')
+    # move to faiss_controller
+    k = 10
     print('vector search')
-    distances, indices = index.search(query_embedding, k)
+    distances, indices = faiss_controller.similarity_search(faiss_controller.experimental_path, query_embedding, k)
 
     for i in range(len(indices[0])):
         try:
-            abstract = db.get_paper_by_embedding_id(int(indices[0][i]))
-            print(f'{indices[0][i]}-{distances[0][i]:.3f}-{abstract}')
+            print(indices[0][i], distances[0][i])
         except TypeError:
             print('Entry not found')
 
@@ -45,6 +40,5 @@ def literature_reivew(model, topic):
     # print(response.text)
 
 if __name__ == "__main__":
-    gai = genai.Client(api_key=constants.GEMINI_API_KEY)
-    topic = 'The problem of clustering a set of points so as to minimize the maximum intercluster distance is studied. An O(kn) approximation algorithm, where n is the number of points and k is the number of clusters, that guarantees solutions with an objective function value within two times the optimal solution value is presented. This approximation algorithm succeeds as long as the set of points satisfies the triangular inequality. We also show that our approximation algorithm is best possible, with respect to the approximation bound, if P ≠ NP.\n'
-    literature_reivew(gai, topic)
+    topic = 'The article examines the issue of drug clustering. Initially, k classes are arbitrarily formed and the resulting training sample is pre-processed, then the similarities between the objects of each class are evaluated based on the proximity function and the criterion for evaluating the contribution of objects to the formation of their own class. Usually, it is in percentage and is the degree of mutual similarity of objects of each class. In the next steps of the algorithm, first, one object is taken from the first class, and by adding it to all k classes, the contribution of this object to this class is measured. The object will be left in the class which has the most contribution. This process is repeated several times in a row for all objects of the class. The process is stopped when the location of objects does not change and the degree of similarity exceeds the required percentage. As a result, the required clusters are formed.'
+    literature_reivew(topic)

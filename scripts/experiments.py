@@ -5,6 +5,7 @@ import constants
 import scrap_papers as sp
 import faiss_controller as faiss
 
+#func for robust vector similarity search
 def cosine_distance(a, b):
     return 1 - np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 

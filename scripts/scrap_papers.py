@@ -9,42 +9,40 @@ import constants
 import sqlite_controller as db
 import faiss_controller as faiss
 
+# scraps paper from any kaznu journal
 def get_kaznu_paper(path, paper_id, language_code = 'ru_RU'):
     try:
-        # Target URL and desired language
-        #url = f"https://bm.kaznu.kz/index.php/kaznu/article/view/{paper_id}"
-        paper_url = path + 'article/view/' + str(paper_id)
+        common_path = path + '/index.php/1-FIL/'
+        paper_url = common_path + 'article/view/' + str(paper_id)
         print(paper_url)
 
-        # Create a session to maintain cookies
+        # session to maintain cookies
         session = requests.Session()
 
-        # First, get the original page to establish session
+        # original page to establish session
         response = session.get(paper_url)
         response.raise_for_status() # Check for errors
 
-        # Construct the language switch URL
-        switch_url = path + 'user/setLocale/' + language_code
+        # language switch URL
+        switch_url = common_path + 'user/setLocale/' + language_code
         params = {
-            "source": f"{path}{paper_id}"
+            "source": f"{common_path}{paper_id}"
         }
 
-        # Send the language switch request
+        # language switch request
         switch_response = session.post(switch_url, params=params)
         switch_response.raise_for_status()
 
-        # Now get the page in the selected language
+        # page in the selected language
         localized_response = session.get(paper_url)
         localized_response.raise_for_status()
 
-        # Parse the content with BeautifulSoup
+        # parsing
         soup = BeautifulSoup(localized_response.text, 'html.parser')
 
-        # title, abstract, citation
+        # extraction of title, abstract, citation
         title = soup.find('h1', class_='page_title').get_text(strip=True)
         abstract_element = (soup.find('section', class_='abstract'))
-        # for br in abstract_element.find_all('br'):
-        #     br.replace_with('\n')
         all_paragraphs = abstract_element.find_all('p')
 
         abstract = '\n'.join([
@@ -52,6 +50,7 @@ def get_kaznu_paper(path, paper_id, language_code = 'ru_RU'):
         citation = soup.find('div', class_='csl-entry').get_text()
 
         return [title, abstract, citation]
+
     except requests.exceptions.RequestException as e:
         print(e)
         time.sleep(0.5)
@@ -62,6 +61,7 @@ def get_kaznu_paper(path, paper_id, language_code = 'ru_RU'):
         time.sleep(0.5)
         return None
 
+# get multiple papers in id range from one journal
 def scrap_kaznu_journal(path, start_id, end_id, client):
     journal_id = db.check_journal_by_name(path)
     for paper_id in range(start_id, end_id + 1):
@@ -82,38 +82,4 @@ def scrap_kaznu_journal(path, start_id, end_id, client):
 
 if __name__ == "__main__":
     gai = genai.Client(api_key=constants.GEMINI_API_KEY)
-    scrap_kaznu_journal('https://philart.kaznu.kz/index.php/1-FIL/', 4900, 4959, gai)
-    # dict_to_json = {}
-    # paper_list = []
-    #
-    # for current_paper_id in range(1300, 1700):
-    #     current_data = get_math_paper(current_paper_id)
-    #     if (current_data != None):
-    #         paper_list.append(current_data)
-    #         print(f"Paper {current_paper_id} added")
-    #     else:
-    #         print(f"Paper {current_paper_id} not found")
-    #     time.sleep(0.5)
-    #
-    # dict_to_json['papers'] = paper_list
-    #
-    # with open('../../data/json/math.json', "w", encoding='utf-8') as f:
-    #     json.dump(dict_to_json, f, ensure_ascii=False)
-
-
-# Add your specific scraping logic here for other elements
-# For example, to get the article content:
-# article_content = soup.find('div', {'id': 'content'})  # Adjust selector as needed
-
-# soup = BeautifulSoup(response.text, 'html.parser')
-
-# def get_content(tag_name, property_name, property_value, output_property):
-#     tags = soup.find_all(tag_name, attrs={property_name: property_value})
-#     output = []
-#     for tag in tags:
-#         output.append(tag[output_property])
-#     return output
-
-# meta_description = soup.find_all('meta', attrs={'name': 'DC.Description'})
-#
-# print(meta_description)
+    scrap_kaznu_journal('https://philart.kaznu.kz', 4900, 4959, gai)

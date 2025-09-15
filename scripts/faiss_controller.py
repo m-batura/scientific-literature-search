@@ -10,12 +10,13 @@ def add_to_faiss(embedding, path):
     faiss.write_index(index, path)
     print('faiss saved')
 
+# uses built in faiss functions
 def similarity_search(faiss_path, vector, k):
     index = faiss.read_index(faiss_path)
     distances, indices = index.search(vector, k)
     return distances, indices
 
-
+# how many vectors are in faiss file
 def num_of_vectors(path):
     index = faiss.read_index(path)
     return index.ntotal

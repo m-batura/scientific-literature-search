@@ -2,7 +2,7 @@ import sqlite3
 import json
 
 import faiss_controller
-from scripts import gai_controller
+# from scripts import gai_controller
 
 db_path = '../data/db/db.sqlite'
 
@@ -57,52 +57,52 @@ def add_kaznu_paper(journal_id, paper_id, title, annotation, citation, vector_id
         pass
     conn.close()
 
-# adds paper to experimental table
-def add_experiment_paper(link, abstract):
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
+# # adds paper to experimental table
+# def add_experiment_paper(link, abstract):
+#     conn = sqlite3.connect(db_path)
+#     cursor = conn.cursor()
 
-    print('Connected to db')
+#     print('Connected to db')
 
-    cursor.execute("""
-            SELECT 1 FROM experimental WHERE link_to_paper = ?
-        """, (link,))
-    result = cursor.fetchone()
+#     cursor.execute("""
+#             SELECT 1 FROM experimental WHERE link_to_paper = ?
+#         """, (link,))
+#     result = cursor.fetchone()
 
-    if result is not None:
-        conn.close()
-        print("paper with that link exists")
-        return
+#     if result is not None:
+#         conn.close()
+#         print("paper with that link exists")
+#         return
 
-    print('paper is unique')
+#     print('paper is unique')
 
-    next_faiss_id = faiss_controller.num_of_vectors(faiss_controller.experimental_path)
+#     next_faiss_id = faiss_controller.num_of_vectors(faiss_controller.experimental_path)
 
-    print( f'next faiss id {next_faiss_id}')
+#     print( f'next faiss id {next_faiss_id}')
 
-    cursor.execute('''SELECT 1 FROM experimental WHERE faiss_id = ?
-        ''', (next_faiss_id,))
-    result = cursor.fetchone()
+#     cursor.execute('''SELECT 1 FROM experimental WHERE faiss_id = ?
+#         ''', (next_faiss_id,))
+#     result = cursor.fetchone()
 
-    if result is not None:
-        conn.close()
-        print("paper with that faiss id exists")
-        return
+#     if result is not None:
+#         conn.close()
+#         print("paper with that faiss id exists")
+#         return
 
-    cursor.execute("""
-    INSERT INTO experimental (faiss_id, link_to_paper, abstract)
-    VALUES (?, ?, ?)
-    """, (next_faiss_id, link, abstract))
+#     cursor.execute("""
+#     INSERT INTO experimental (faiss_id, link_to_paper, abstract)
+#     VALUES (?, ?, ?)
+#     """, (next_faiss_id, link, abstract))
 
-    print('db entry added')
+#     print('db entry added')
 
-    embedding = gai_controller.get_embedding(abstract)
-    faiss_controller.add_to_faiss(embedding, faiss_controller.experimental_path)
+#     embedding = gai_controller.get_embedding(abstract)
+#     faiss_controller.add_to_faiss(embedding, faiss_controller.experimental_path)
 
-    conn.commit()
-    conn.close()
+#     conn.commit()
+#     conn.close()
 
-    print('sqlite saved')
+#     print('sqlite saved')
 
 # gets id from journals table
 def get_journal_id(name):

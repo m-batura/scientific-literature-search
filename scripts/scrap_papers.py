@@ -3,16 +3,16 @@ import numpy as np
 import requests
 import json
 from bs4 import BeautifulSoup
-from google import genai
+# from google import genai
 
-import constants
+# import constants
 import sqlite_controller as db
 import faiss_controller as faiss
 
 # scraps paper from any kaznu journal
 def get_kaznu_paper(path, paper_id, language_code = 'ru_RU'):
     try:
-        common_path = path + '/index.php/1-FIL/'
+        common_path = path# + '/index.php/1-FIL/'
         paper_url = common_path + 'article/view/' + str(paper_id)
         print(paper_url)
 
@@ -74,12 +74,12 @@ def scrap_kaznu_journal(path, start_id, end_id, client):
             title, abstract, citation = paper
             embedding_raw = faiss.get_embedding(abstract, client)
             embedding = np.array(embedding_raw, dtype='float32').reshape(1, -1)
-            vector_id = faiss.add_to_faiss(embedding, papers_path)
+            vector_id = faiss.add_to_faiss(embedding, faiss.papers_path)
             db.add_paper(journal_id, paper_id, title, abstract, citation, vector_id)
 
 
 
 
-if __name__ == "__main__":
-    gai = genai.Client(api_key=constants.GEMINI_API_KEY)
-    scrap_kaznu_journal('https://philart.kaznu.kz', 4900, 4959, gai)
+# if __name__ == "__main__":
+#     gai = genai.Client(api_key=constants.GEMINI_API_KEY)
+#     scrap_kaznu_journal('https://philart.kaznu.kz', 4900, 4959, gai)

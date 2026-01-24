@@ -1,2 +1,7 @@
-import os
-print(os.listdir("."))
+thisdict = {
+  "brand": "Ford",
+  "model": "Mustang",
+  "year": 1964
+}
+
+print(thisdict['brand', 'model'])

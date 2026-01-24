@@ -2,9 +2,9 @@ import numpy as np
 #from google import genai
 
 #import constants
-import scrap_papers as sp
+import scrap_kaznu as sp
 import faiss_controller as faiss
-import sentence_transfromers_controllers as stc
+import sent_trans_controller as stc
 
 #func for robust vector similarity search
 def cosine_distance(a, b):
@@ -21,12 +21,8 @@ def lang_similarity_exp(path, id, model_path):
     paper_kz = sp.get_kaznu_paper(path, id, 'uk_UA')
     abstract_kz = paper_kz[1]
     embedding_kz = model.encode(abstract_kz)
-
-    dist_en_ru = cosine_distance(embedding_en, embedding_ru)
-    dist_en_kz = cosine_distance(embedding_en, embedding_kz)
-    dist_ru_kz = cosine_distance(embedding_ru, embedding_kz)
-
-    print(f"en-ru: {dist_en_ru:.4f}, en-kz: {dist_en_kz:.4f}, ru-kz: {dist_ru_kz:.4f}")
+    embedings = [embedding_en, embedding_ru, embedding_kz]
+    print(model.similarity(embedings, embedings))
 
 # def lang_similarity_exp(path, id, client):
 #     paper_en = sp.get_kaznu_paper(path, id, 'en_US')

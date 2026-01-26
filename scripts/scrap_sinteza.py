@@ -28,12 +28,37 @@ def scrap_papers(link):
 
         # parsing
         page = BeautifulSoup(response.text, 'html.parser')
-        # write return of 2d array [name, ref]
+        papers = page.find_all('tr')[1:]
+        papers = [paper.find_all('td')[1].a for paper in papers]
+        return np.array([[paper.string, paper['href']] for paper in papers])
+        
+
+    except Exception as e:
+        print(e)
+        return None
+
+def scrap_abstract(link):
+    try:
+        session = requests.Session()
+
+        # original page to establish session
+        response = session.get(link)
+        response.raise_for_status() # Check for errors
+
+        # parsing
+        page = BeautifulSoup(response.text, 'html.parser')
+        print(page.div.find_all('div', recursive=False)[2].find_all('div', recursive=False)[2].find_all('div', recursive=False)[4].contents[6].strip())
+        
 
     except Exception as e:
         print(e)
         return None
 
 if __name__ == "__main__":
-    volumes = scrap_volumes('https://portal.sinteza.singidunum.ac.rs/')
-    print(volumes)
+    # volumes = scrap_volumes('https://portal.sinteza.singidunum.ac.rs/')
+    # print(volumes)
+
+    # papers = scrap_papers('https://portal.sinteza.singidunum.ac.rs/issue/showAll/2025')
+    # print(papers)
+
+    scrap_abstract('https://portal.sinteza.singidunum.ac.rs/paper/920')

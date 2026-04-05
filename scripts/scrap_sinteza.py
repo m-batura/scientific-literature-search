@@ -58,7 +58,7 @@ if __name__ == "__main__":
     # volumes = scrap_volumes('https://portal.sinteza.singidunum.ac.rs/')
     # print(volumes)
 
-    # papers = scrap_papers('https://portal.sinteza.singidunum.ac.rs/issue/showAll/2025')
-    # print(papers)
+    papers = scrap_papers('https://portal.sinteza.singidunum.ac.rs/issue/showAll/2025')
+    print(papers)
 
-    scrap_abstract('https://portal.sinteza.singidunum.ac.rs/paper/920')
+    # scrap_abstract('https://portal.sinteza.singidunum.ac.rs/paper/920')

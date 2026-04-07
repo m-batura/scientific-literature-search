@@ -47,7 +47,7 @@ def scrap_abstract(link):
 
         # parsing
         page = BeautifulSoup(response.text, 'html.parser')
-        print(page.div.find_all('div', recursive=False)[2].find_all('div', recursive=False)[2].find_all('div', recursive=False)[4].contents[6].strip())
+        return page.div.find_all('div', recursive=False)[2].find_all('div', recursive=False)[2].find_all('div', recursive=False)[4].contents[6].strip()
         
 
     except Exception as e:

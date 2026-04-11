@@ -12,8 +12,8 @@ def save_model(model_name):
 def load_model(model_path):
     return SentenceTransformer(model_path, trust_remote_code=True)
 
-def cosine_distance(a, b):
-    return 1 - np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+def cosine_distance(vector1, vector2):
+    return 1 - np.dot(vector1, vector2) / (np.linalg.norm(vector1) * np.linalg.norm(vector2))
 
 # def get_embedding()
 # save_model("Alibaba-NLP/gte-multilingual-base")

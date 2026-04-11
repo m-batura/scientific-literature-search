@@ -35,10 +35,19 @@ def compare_paper_to_citations():
     df['abstract_embed'] = df['abstract'].apply(model.encode)
     print('abstracts encoded')
     df['title_title'] = df['title_embed'].apply(lambda x: stc.cosine_distance(x, df['title_embed'][0]))
-    print(df[['group', 'title_title']].sort_values(by='title_title'))
+    # print(df[['group', 'title_title']].sort_values(by='title_title'))
+    df['abstract_title'] = df['title_embed'].apply(lambda x: stc.cosine_distance(x, df['abstract_embed'][0]))
+    # print(df[['group', 'abstract_title']].sort_values(by='abstract_title'))
     df['abstract_abstract'] = df['abstract_embed'].apply(lambda x: stc.cosine_distance(x, df['abstract_embed'][0]))
-    print(df[['group', 'abstract_abstract']].sort_values(by='abstract_abstract'))
-
+    # print(df[['group', 'abstract_abstract']].sort_values(by='abstract_abstract'))
+    df1 = df[['group', 'title_title']].sort_values(by='title_title').reset_index(drop=True)
+    df2 = df[['group', 'abstract_title']].sort_values(by='abstract_title').reset_index(drop=True)
+    df3 = df[['group', 'abstract_abstract']].sort_values(by='abstract_abstract').reset_index(drop=True)
+    df1.columns = ['group_t_t', 'title_title']
+    df2.columns = ['group_a_t', 'abstract_title']
+    df3.columns = ['group_a_a', 'abstract_abstract']
+    combined = pd.concat([df1, df2, df3], axis=1)
+    print(combined.to_string(index=False))
 
 def lang_similarity_exp(path, id, model_path):
     model = stc.load_model(stc.path_to_gte)

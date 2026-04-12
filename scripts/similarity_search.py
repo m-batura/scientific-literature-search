@@ -1,24 +1,39 @@
-from gai_controller import get_embedding
-import faiss_controller
+# from gai_controller import get_embedding
+# import faiss_controller
+import scrap_sinteza as sinteza
+import sent_trans_controller as stc
+import time
 
-def find_k_similar_texts(topic, k):
-    print('get promt embedding')
-    query_embedding = get_embedding(topic)
+def save_titles_embeddings():
+    current = time.time()
+    df = sinteza.get_all_papers()
+    print((time.time() - current), 'time from start')
+    current = time.time()
+    model = stc.load_model(stc.path_to_gte)
+    df['title_embed'] = df['title'].apply(model.encode)
+    print((time.time() - current) / len(df.index), 's per title')
+    print(df.head(10))
 
-    print('vector search')
-    distances, indices = faiss_controller.similarity_search(faiss_controller.experimental_path, query_embedding, k)
+# def find_k_similar_texts(topic, k):
+#     print('get promt embedding')
+#     query_embedding = get_embedding(topic)
 
-    for i in range(len(indices[0])):
-        try:
-            print(indices[0][i], distances[0][i])
-        except TypeError:
-            print('Entry not found')
+#     print('vector search')
+#     distances, indices = faiss_controller.similarity_search(faiss_controller.experimental_path, query_embedding, k)
+
+#     for i in range(len(indices[0])):
+#         try:
+#             print(indices[0][i], distances[0][i])
+#         except TypeError:
+#             print('Entry not found')
 
 if __name__ == "__main__":
-    title = 'A New Hybrid Descent Algorithm for Large-Scale Nonconvex Optimization and Application to Some Image Restoration Problems'
-    find_k_similar_texts(title, 10)
-    topic = '''Conjugate gradient methods are widely used and attractive for large-scale unconstrained smooth optimization problems, with simple computation, low memory requirements, and interesting theoretical information on the features of curvature. Based on the strongly convergent property of the Dai–Yuan method and attractive numerical performance of the Hestenes–Stiefel method, a new hybrid descent conjugate gradient method is proposed in this paper. The proposed method satisfies the sufficient descent property independent of the accuracy of the line search strategies. Under the standard conditions, the trust region property and the global convergence are established, respectively. Numerical results of 61 problems with 9 large-scale dimensions and 46 ill-conditioned matrix problems reveal that the proposed method is more effective, robust, and reliable than the other methods. Additionally, the hybrid method also demonstrates reliable results for some image restoration problems.'''
-    find_k_similar_texts(topic, 10)
+    save_titles_embeddings()
+    # title = 'A New Hybrid Descent Algorithm for Large-Scale Nonconvex Optimization and Application to Some Image Restoration Problems'
+    # find_k_similar_texts(title, 10)
+    # topic = '''Conjugate gradient methods are widely used and attractive for large-scale unconstrained smooth optimization problems, with simple computation, low memory requirements, and interesting theoretical information on the features of curvature. Based on the strongly convergent property of the Dai–Yuan method and attractive numerical performance of the Hestenes–Stiefel method, a new hybrid descent conjugate gradient method is proposed in this paper. The proposed method satisfies the sufficient descent property independent of the accuracy of the line search strategies. Under the standard conditions, the trust region property and the global convergence are established, respectively. Numerical results of 61 problems with 9 large-scale dimensions and 46 ill-conditioned matrix problems reveal that the proposed method is more effective, robust, and reliable than the other methods. Additionally, the hybrid method also demonstrates reliable results for some image restoration problems.'''
+    # find_k_similar_texts(topic, 10)
+    0
 
 # calling google ai to write review
 

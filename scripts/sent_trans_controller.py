@@ -3,22 +3,25 @@ import scrap_sinteza
 import numpy as np
 import time
 
-path_to_gte = 'C:\\Misha\\University\\FinalThesis\\Automatic-Literature-Review-with-RAG\\st_models\\gte-multilingual-base'
 
-def save_model(model_name):
+path_to_gte = '.\\st_models\\gte-multilingual-base'
+
+def save_model(model_name='Alibaba-NLP/gte-multilingual-base'):
     model = SentenceTransformer(model_name, trust_remote_code=True)
-    model.save('st_models')
+    model.save(path_to_gte)
 
-def load_model(model_path):
+def load_model(model_path=path_to_gte):
     return SentenceTransformer(model_path, trust_remote_code=True)
 
 def cosine_distance(vector1, vector2):
     return 1 - np.dot(vector1, vector2) / (np.linalg.norm(vector1) * np.linalg.norm(vector2))
 
 # def get_embedding()
-# save_model("Alibaba-NLP/gte-multilingual-base")
+
 
 if __name__ == "__main__":
+    save_model()
+    # load_model()
     # print('program start')
     # time_stamp = time.time()
     # model = load_model('gte-multilingual-base')

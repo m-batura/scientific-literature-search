@@ -1,10 +1,9 @@
-import numpy as np
 import pandas as pd
 #from google import genai
 
 #import constants
 import scrap_kaznu as sp
-import faiss_controller as faiss
+# import faiss_controller as faiss
 import sent_trans_controller as stc
 
 def compare_paper_to_citations():
@@ -27,13 +26,9 @@ def compare_paper_to_citations():
         [3, 'https://doi.org/10.15308/Sinteza-2019-621-626', 'Second Language Vocabulary Acquisition Enhanced by the Use of Technology', 'This paper focuses on the possibilities technology offers in the area of second language teaching and learning, with the emphasis on its use for the purpose of enhancing learners’ vocabulary. With the introduction of computer-assisted foreign language learning instruction, new strategies and approaches to foreign language teaching and learning have also been proposed. The aim of this work is to review effective approaches to teaching and learning vocabu- lary, and to analyse how these can be supported and improved by the use of various technological advances. The purpose of this paper is to promote technology-assisted vocabulary learning with the emphasis on pedagogical implications and principles guiding the use of various technological options.'],
     ]
     df = pd.DataFrame(data=data, columns=['group', 'link', 'title', 'abstract'])
-    print('df created')
     model = stc.load_model(stc.path_to_gte)
-    print('model loaded')
     df['title_embed'] = df['title'].apply(model.encode)
-    print('titles encoded')
     df['abstract_embed'] = df['abstract'].apply(model.encode)
-    print('abstracts encoded')
     df['title_title'] = df['title_embed'].apply(lambda x: stc.cosine_distance(x, df['title_embed'][0]))
     # print(df[['group', 'title_title']].sort_values(by='title_title'))
     df['abstract_title'] = df['title_embed'].apply(lambda x: stc.cosine_distance(x, df['abstract_embed'][0]))

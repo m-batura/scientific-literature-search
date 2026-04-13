@@ -20,8 +20,8 @@ def cosine_distance(vector1, vector2):
 
 
 if __name__ == "__main__":
-    save_model()
-    # load_model()
+    # save_model()
+    load_model()
     # print('program start')
     # time_stamp = time.time()
     # model = load_model('gte-multilingual-base')

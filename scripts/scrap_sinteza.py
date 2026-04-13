@@ -32,7 +32,7 @@ def scrap_papers(link_to_volume):
         papers = page.find_all('tr')[1:]
         papers = [paper.find_all('td')[1].a for paper in papers]
         print('returning', link_to_volume)
-        return [(paper.string, paper['href']) for paper in papers]
+        return [(paper['href'], paper.string) for paper in papers]
         
     except Exception as e:
         print(e)

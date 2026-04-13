@@ -3,3 +3,5 @@
 /.vscode
 /st_models
 /scripts/__pycache__
+titles.parquet
+titles.json

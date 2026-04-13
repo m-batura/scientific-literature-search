@@ -1,20 +1,15 @@
 from sentence_transformers import SentenceTransformer
 import os
+import shutil
+from pathlib import Path
 
 if __name__ == "__main__":
   
-  print(os.listdir('.\\st_models'))    
-  # thisdict = {
-  #   "brand": "Ford",
-  #   "model": "Mustang",
-  #   "year": 1964
-  # }
 
-  # print(thisdict['brand', 'model'])
-  # print('start ')
-  # model = SentenceTransformer('C:\\Misha\\University\\FinalThesis\\Automatic-Literature-Review-with-RAG\\st_models\\gte-multilingual-base', trust_remote_code=True, fix_mistral_regex=True)
-  # print('loaded')
-  # embeddings = model.encode('Enhancing Retrieval - Augmented Generation with Graph-Based Retrieval and Generative Modeling')  
-  # print(type(embeddings[0]))
+  cache_path = Path.home() / ".cache" / "huggingface" / "modules" / "transformers_modules" / "gte_hyphen_multilingual_hyphen_base"
+
+  if cache_path.exists():
+    shutil.rmtree(cache_path)
+    print(f"Removed cached model at {cache_path}")
 
   0

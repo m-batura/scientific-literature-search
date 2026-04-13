@@ -17,7 +17,7 @@ def save_titles_embeddings(path=path_to_parquet):
     model = stc.load_model(stc.path_to_gte)
     df['title_embed'] = df['title'].apply(model.encode)
     print((time.time() - current))
-    # print(df.head(10))
+    print(len(df.index))
     df.to_parquet(path)
 
 def read_titles_embeddings(path=path_to_parquet):
@@ -53,16 +53,16 @@ if __name__ == "__main__":
     # save_titles_embeddings()
 
     promt = 'Automating literature search with the help of local embedding models'
-    # promt = 'Automating literature search with the help of local embedding models '
     # promt = 'Rastući značaj inovacija u procesu dostizanja održive konkurentne prednosti je u najvećoj meri i uslovio ubrzani razvoj internet marketinga i inicirao sve veću upotrebu društvenih mreža u cilju unapređenja dugoročnog odnosa organizacije i ciljne grupe potrošača. U novoj ekonomiji, odnosno ekonomiji znanja, sam pojam inovacija, pored značajnih unapređenja proizvoda i procesa, sve više podrazumeva organizacione i marketing inovacije, a naročito inovacije u oblasti internet marketinga. Usled navedenih trendova, u ovom naučnom radu, posebna pažnja je usmerena upravo na analizu uticaja koji internet marketing i upotreba internet društvenih mreža imaju na proces unapređenja dvosmerne, odnosno interaktivne komunikacije sa potrošačima. Analizom su obuhvaćeni i brojni primeri realizovanih istraživanja čiji dobijeni rezultati ukazuju da upravo inovacije u oblasti internet marketinga postaju krucijalni faktor direferenciranja i dostizanja održive konkurentne prednosti organizacija, ali i ukazuju kakvo je trenutno stanje u oblasti internet marketinga i upotrebe internet društvenih mreža u Republici Srbiji.'
     
-    model = stc.load_model(stc.path_to_gte)
-    embedding = model.encode(promt)
-    df = read_titles_embeddings()
-    df_first = first_retrieval(df, embedding)
-    df_second = second_retrieval(df_first, embedding)
-    pd.set_option('display.max_colwidth', 20)
-    print(df_second)
+    # model = stc.load_model(stc.path_to_gte)
+    # embedding = model.encode(promt)
+    # df = read_titles_embeddings()
+    # df_first = first_retrieval(df, embedding)
+    # df_second = second_retrieval(df_first, embedding)
+    # pd.set_option('display.max_colwidth', 20)
+    # print(df_second)
+
     # df_second.to_csv('.\\result.csv')
     # print(df_second['link'].to_markdown())
 

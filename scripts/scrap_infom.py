@@ -1,16 +1,9 @@
 import time
-import numpy as np
 import requests
-import json
 from bs4 import BeautifulSoup
-# from google import genai
 
-# import constants
-import sqlite_controller as db
-import faiss_controller as faiss
 
-# scraps paper from any kaznu journal
-def get_kaznu_paper(path, paper_id, language_code = 'ru_US'):
+def get_infom_paper(path, paper_id, language_code = 'en_US'):
     try:
         # common_path = path# + '/index.php/1-FIL/'
         paper_url = path + 'article/view/' + str(paper_id)
@@ -41,16 +34,15 @@ def get_kaznu_paper(path, paper_id, language_code = 'ru_US'):
         soup = BeautifulSoup(localized_response.text, 'html.parser')
 
         # print(soup)
+
         # extraction of title, abstract, citation
         title = soup.find('h1', class_='page_title').get_text(strip=True)
-        abstract_element = (soup.find('section', class_='abstract'))
+        abstract_element = (soup.find('div', class_='item abstract'))
         all_paragraphs = abstract_element.find_all('p')
-
         abstract = '\n'.join([
             paragraph.get_text() for paragraph in all_paragraphs])
-        citation = soup.find('div', class_='csl-entry').get_text()
 
-        return [title, abstract, citation]
+        return [title, abstract]
 
     except requests.exceptions.RequestException as e:
         print(e)
@@ -61,25 +53,6 @@ def get_kaznu_paper(path, paper_id, language_code = 'ru_US'):
         print(e)
         time.sleep(0.5)
         return None
-
-# get multiple papers in id range from one journal
-def scrap_kaznu_journal(path, start_id, end_id, client):
-    journal_id = db.check_journal_by_name(path)
-    for paper_id in range(start_id, end_id + 1):
-        if db.paper_exists(journal_id, paper_id):
-            print(f"Skipping existing paper: journal_id={journal_id}, paper_id={paper_id}")
-            continue
-
-        paper = get_kaznu_paper(path, paper_id)
-        if paper:
-            title, abstract, citation = paper
-            embedding_raw = faiss.get_embedding(abstract, client)
-            embedding = np.array(embedding_raw, dtype='float32').reshape(1, -1)
-            vector_id = faiss.add_to_faiss(embedding, faiss.papers_path)
-            db.add_paper(journal_id, paper_id, title, abstract, citation, vector_id)
-
-
-
-
+    
 if __name__ == "__main__":
-    get_kaznu_paper('https://bm.kaznu.kz/index.php/kaznu/', 1608)
+    print(get_infom_paper('https://www.infom.org.rs/index.php/infom/', 2709, 'en_US'))

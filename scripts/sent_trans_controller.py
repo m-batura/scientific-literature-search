@@ -14,7 +14,7 @@ def load_model(model_path=path_to_gte):
     return SentenceTransformer(model_path, trust_remote_code=True)
 
 def cosine_distance(vector1, vector2):
-    return 1 - np.dot(vector1, vector2) / (np.linalg.norm(vector1) * np.linalg.norm(vector2))
+    return np.dot(vector1, vector2) / (np.linalg.norm(vector1) * np.linalg.norm(vector2))
 
 # def get_embedding()
 

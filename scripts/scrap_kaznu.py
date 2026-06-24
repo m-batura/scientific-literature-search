@@ -3,7 +3,6 @@ import numpy as np
 import requests
 from bs4 import BeautifulSoup
 import sqlite_controller as db
-import faiss_controller as faiss
 
 # scraps paper from any kaznu journal
 def get_kaznu_paper(path, paper_id, language_code = 'ru_US'):

@@ -2,9 +2,11 @@ import pandas as pd
 import scrap_kaznu as scrkz
 import scrap_infom as scrif
 import sent_trans_controller as stc
+import metrics as met
 
-def compare_paper_to_citations():
-    print('func start')
+path_to_citations = '.\\saves\\citations.parquet'
+
+def save_paper_citations():
     data = [
         [1, 'https://doi.org/10.15308/Sinteza-2025-3-9', 'Enhancing Retrieval - Augmented Generation with Graph-Based Retrieval and Generative Modeling', 'This paper presents the design and implementation of a robust RetrievalAugmented Generation (RAG) system that integrates advanced retrieval, ranking, and generative techniques to address knowledge-intensive tasks. The system combines dense retrieval using ChromaDB, metadata-driven keyword extraction with YAKE and KMedoids algorithm for clustering keywords, graph-based retrieval leveraging PageRank, and cross-encoder re-ranking to deliver precise and contextually relevant results. These retrieval outputs are synthesized into high-quality conversational responses using Hugging Face models and Google API. A modular pipeline ensures scalability, seamlessly integrating various retrieval and generative components. Evaluation results demonstrate high retrieval precision, improved recall through graph-based methods, and enhanced response quality through structured prompt engineering. This work highlights the effectiveness of combining diverse techniques in RAG systems, offering a foundation for scalable, reliable, and context-aware applications in domains such as customer support, education, and research.'],
         [1, 'https://doi.org/10.48550/arXiv.2005.11401', 'Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks', 'Large pre-trained language models have been shown to store factual knowledge in their parameters, and achieve state-of-the-art results when fine-tuned on downstream NLP tasks. However, their ability to access and precisely manipulate knowledge is still limited, and hence on knowledge-intensive tasks, their performance lags behind task-specific architectures. Additionally, providing provenance for their decisions and updating their world knowledge remain open research problems. Pre-trained models with a differentiable access mechanism to explicit non-parametric memory can overcome this issue, but have so far been only investigated for extractive downstream tasks. We explore a general-purpose fine-tuning recipe for retrieval-augmented generation (RAG) -- models which combine pre-trained parametric and non-parametric memory for language generation. We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever. We compare two RAG formulations, one which conditions on the same retrieved passages across the whole generated sequence, the other can use different passages per token. We fine-tune and evaluate our models on a wide range of knowledge-intensive NLP tasks and set the state-of-the-art on three open domain QA tasks, outperforming parametric seq2seq models and task-specific retrieve-and-extract architectures. For language generation tasks, we find that RAG models generate more specific, diverse and factual language than a state-of-the-art parametric-only seq2seq baseline.'],
@@ -26,9 +28,20 @@ def compare_paper_to_citations():
     model = stc.load_model(stc.path_to_gte)
     df['title_embed'] = df['title'].apply(model.encode)
     df['abstract_embed'] = df['abstract'].apply(model.encode)
-    df['title_title'] = df['title_embed'].apply(lambda x: stc.cosine_distance(x, df['title_embed'][0]))
-    df['abstract_title'] = df['title_embed'].apply(lambda x: stc.cosine_distance(x, df['abstract_embed'][0]))
-    df['abstract_abstract'] = df['abstract_embed'].apply(lambda x: stc.cosine_distance(x, df['abstract_embed'][0]))
+    df[['group', 'title_embed', 'abstract_embed']].to_parquet(path_to_citations)
+
+def compare_paper_to_citations():
+    print('start')
+    df = pd.read_parquet(path_to_citations)
+    print('tt')
+    df['title_title'] = df['title_embed'].apply(lambda x: met.dot(x, df['title_embed'][0]))
+
+    true_tt, result_tt, pred_tt = met.transfrom_pandas(df['group'], df['title_title'])
+
+    print('at')
+    df['abstract_title'] = df['title_embed'].apply(lambda x: met.dot(x, df['abstract_embed'][0]))
+    print('aa')
+    df['abstract_abstract'] = df['abstract_embed'].apply(lambda x: met.dot(x, df['abstract_embed'][0]))
     df1 = df[['group', 'title_title']].sort_values(by='title_title', ascending=False).reset_index(drop=True)
     df2 = df[['group', 'abstract_title']].sort_values(by='abstract_title', ascending=False).reset_index(drop=True)
     df3 = df[['group', 'abstract_abstract']].sort_values(by='abstract_abstract', ascending=False).reset_index(drop=True)
@@ -37,6 +50,8 @@ def compare_paper_to_citations():
     df3.columns = ['group_a_a', 'abstract_abstract']
     combined = pd.concat([df1, df2, df3], axis=1)
     print(combined.to_string(index=False))
+    print(accuracy, precision, recall, f1)
+
 
 def lang_similarity_en_ru_kz(journal, id):
     model = stc.load_model(stc.path_to_gte)
@@ -49,9 +64,9 @@ def lang_similarity_en_ru_kz(journal, id):
     paper_kz = scrkz.get_kaznu_paper(journal, id, 'uk_UA')
     abstract_kz = paper_kz[1]
     embedding_kz = model.encode(abstract_kz)
-    print(stc.cosine_distance(embedding_en, embedding_kz),
-          stc.cosine_distance(embedding_en, embedding_ru),
-          stc.cosine_distance(embedding_kz, embedding_ru))
+    print(met.dot(embedding_en, embedding_kz),
+          met.dot(embedding_en, embedding_ru),
+          met.dot(embedding_kz, embedding_ru))
 
 def lang_similarity_en_rs(journal='https://www.infom.org.rs/index.php/infom/', id_list=[2695, 2709, 2715, 2707, 2713, 2701, 2699, 2670, 2678]):
     model = stc.load_model(stc.path_to_gte)
@@ -63,13 +78,14 @@ def lang_similarity_en_rs(journal='https://www.infom.org.rs/index.php/infom/', i
     df = pd.DataFrame(data=abstract_pairs, columns=['abstract_en', 'abstract_rs'])
     df['embed_en'] = df['abstract_en'].apply(model.encode)
     df['embed_rs'] = df['abstract_rs'].apply(model.encode)
-    df['similarity_en'] = df['embed_en'].apply(lambda x: stc.cosine_distance(x, df['embed_en'][0]))
-    df['similarity_rs'] = df['embed_rs'].apply(lambda x: stc.cosine_distance(x, df['embed_en'][0]))
+    df['similarity_en'] = df['embed_en'].apply(lambda x: met.dot(x, df['embed_en'][0]))
+    df['similarity_rs'] = df['embed_rs'].apply(lambda x: met.dot(x, df['embed_en'][0]))
     df['difference'] = df['similarity_en'] - df['similarity_rs']
     print(df[['similarity_en', 'similarity_rs', 'difference']])
 
 if __name__ == "__main__":
     # lang_similarity_en_rs()
-    # compare_paper_to_citations()
+    # save_paper_citations()
+    compare_paper_to_citations()
     0
     

@@ -3,8 +3,10 @@ import scrap_kaznu as scrkz
 import scrap_infom as scrif
 import sent_trans_controller as stc
 import metrics as met
+import numpy as np
 
 path_to_citations = '.\\saves\\citations.parquet'
+path_to_language = '.\\saves\\language.parquet'
 
 def save_paper_citations():
     data = [
@@ -36,21 +38,28 @@ def compare_paper_to_citations():
     print('tt')
     df['title_title'] = df['title_embed'].apply(lambda x: met.dot(x, df['title_embed'][0]))
 
-    true_tt, result_tt, pred_tt = met.transfrom_pandas(df['group'], df['title_title'])
+    true_tt, score_tt = met.multi_class(df['group'], df['title_title'])
+    print(true_tt, score_tt)
 
-    print('at')
-    df['abstract_title'] = df['title_embed'].apply(lambda x: met.dot(x, df['abstract_embed'][0]))
-    print('aa')
-    df['abstract_abstract'] = df['abstract_embed'].apply(lambda x: met.dot(x, df['abstract_embed'][0]))
-    df1 = df[['group', 'title_title']].sort_values(by='title_title', ascending=False).reset_index(drop=True)
-    df2 = df[['group', 'abstract_title']].sort_values(by='abstract_title', ascending=False).reset_index(drop=True)
-    df3 = df[['group', 'abstract_abstract']].sort_values(by='abstract_abstract', ascending=False).reset_index(drop=True)
-    df1.columns = ['group_t_t', 'title_title']
-    df2.columns = ['group_a_t', 'abstract_title']
-    df3.columns = ['group_a_a', 'abstract_abstract']
-    combined = pd.concat([df1, df2, df3], axis=1)
-    print(combined.to_string(index=False))
-    print(accuracy, precision, recall, f1)
+    # true_tt, score_tt, pred_tt = met.single_class(df['group'], df['title_title'])
+    # fpr, tpr, thresholds = met.plot_roc(true_tt, score_tt)
+    # print(fpr, tpr, thresholds)
+
+    # print('at')
+    # df['abstract_title'] = df['title_embed'].apply(lambda x: met.dot(x, df['abstract_embed'][0]))
+    # print('aa')
+    # df['abstract_abstract'] = df['abstract_embed'].apply(lambda x: met.dot(x, df['abstract_embed'][0]))
+
+    # df1 = df[['group', 'title_title']].sort_values(by='title_title', ascending=False).reset_index(drop=True)
+    # df2 = df[['group', 'abstract_title']].sort_values(by='abstract_title', ascending=False).reset_index(drop=True)
+    # df3 = df[['group', 'abstract_abstract']].sort_values(by='abstract_abstract', ascending=False).reset_index(drop=True)
+    # df1.columns = ['group_t_t', 'title_title']
+    # df2.columns = ['group_a_t', 'abstract_title']
+    # df3.columns = ['group_a_a', 'abstract_abstract']
+    # combined = pd.concat([df1, df2, df3], axis=1)
+    # print(combined.to_string(index=False))
+
+    # print(accuracy, precision, recall, f1)
 
 
 def lang_similarity_en_ru_kz(journal, id):
@@ -67,25 +76,44 @@ def lang_similarity_en_ru_kz(journal, id):
     print(met.dot(embedding_en, embedding_kz),
           met.dot(embedding_en, embedding_ru),
           met.dot(embedding_kz, embedding_ru))
-
-def lang_similarity_en_rs(journal='https://www.infom.org.rs/index.php/infom/', id_list=[2695, 2709, 2715, 2707, 2713, 2701, 2699, 2670, 2678]):
+    
+def save_paper_lang():
+    journal='https://www.infom.org.rs/index.php/infom/'
+    id_list=[2695, 2709, 2715, 2707, 2713, 2701, 2699, 2670, 2678]
     model = stc.load_model(stc.path_to_gte)
     abstract_pairs = []
     for id in id_list:
         abstract_en = scrif.get_infom_paper(journal, id, 'en_US')[1]
         abstract_rs = scrif.get_infom_paper(journal, id, 'sr_RS')[1]
-        abstract_pairs.append((abstract_en, abstract_rs))
-    df = pd.DataFrame(data=abstract_pairs, columns=['abstract_en', 'abstract_rs'])
+        abstract_pairs.append((id, abstract_en, abstract_rs))
+    df = pd.DataFrame(data=abstract_pairs, columns=['id', 'abstract_en', 'abstract_rs'])
     df['embed_en'] = df['abstract_en'].apply(model.encode)
     df['embed_rs'] = df['abstract_rs'].apply(model.encode)
-    df['similarity_en'] = df['embed_en'].apply(lambda x: met.dot(x, df['embed_en'][0]))
-    df['similarity_rs'] = df['embed_rs'].apply(lambda x: met.dot(x, df['embed_en'][0]))
-    df['difference'] = df['similarity_en'] - df['similarity_rs']
-    print(df[['similarity_en', 'similarity_rs', 'difference']])
+    df[['id', 'embed_en', 'embed_rs']].to_parquet(path_to_language)
+
+def lang_similarity_en_rs():
+    df = pd.read_parquet(path_to_language)
+    results = []
+    en_embeds = np.stack(df['embed_en'].values)
+    rs_embeds = np.stack(df['embed_rs'].values)
+    dot_en_en = en_embeds @ en_embeds.T   
+    dot_en_rs = en_embeds @ rs_embeds.T   
+    diff_matrix = dot_en_en - dot_en_rs   
+    avg_diff = diff_matrix.mean(axis=0)   
+    for idx, id_val in enumerate(df['id']):
+        results.append((id_val, ))
+        results[id_val] = avg_diff[idx]
+    return results
+    # df['similarity_en'] = df['embed_en'].apply(lambda x: met.dot(x, df['embed_en'][0]))
+    # df['similarity_rs'] = df['embed_rs'].apply(lambda x: met.dot(x, df['embed_en'][0]))
+    # df['difference'] = df['similarity_en'] - df['similarity_rs']
+    # print(df)
 
 if __name__ == "__main__":
-    # lang_similarity_en_rs()
-    # save_paper_citations()
-    compare_paper_to_citations()
+    # save_paper_lang()
+    lang_similarity_en_rs()
+    # abstract_en = scrif.get_infom_paper('https://www.infom.org.rs/index.php/infom/', 2695, 'en_US')[1]
+    # print(abstract_en)
+    # compare_paper_to_citations()
     0
     

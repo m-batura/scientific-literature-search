@@ -36,7 +36,7 @@ def recall(true, pred):
 def f1(true, pred):
     return skl.f1_score(true, pred)
 
-def plot_roc(true, score, filename=".\\saves\\roc_curve.svg"):
+def plot_roc(true, score, filename=".\\results\\roc_curve.svg"):
     fpr, tpr, thresholds = skl.roc_curve(true, score)
     roc_auc = skl.auc(fpr, tpr)
 
@@ -52,7 +52,7 @@ def plot_roc(true, score, filename=".\\saves\\roc_curve.svg"):
 
     return fpr, tpr, thresholds
 
-def plot_pr(true, score, filename=".\\saves\\pr_curve.svg"):
+def plot_pr(true, score, filename=".\\results\\pr_curve.svg"):
     precision, recall, thresholds = skl.precision_recall_curve(true, score)
     ap = skl.average_precision_score(true, score)
 

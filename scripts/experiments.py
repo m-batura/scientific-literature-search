@@ -38,27 +38,29 @@ def compare_paper_to_citations():
     print('tt')
     df['title_title'] = df['title_embed'].apply(lambda x: met.dot(x, df['title_embed'][0]))
 
-    true_tt, score_tt = met.multi_class(df['group'], df['title_title'])
-    print(true_tt, score_tt)
-
     # true_tt, score_tt, pred_tt = met.single_class(df['group'], df['title_title'])
     # fpr, tpr, thresholds = met.plot_roc(true_tt, score_tt)
     # print(fpr, tpr, thresholds)
 
-    # print('at')
-    # df['abstract_title'] = df['title_embed'].apply(lambda x: met.dot(x, df['abstract_embed'][0]))
-    # print('aa')
-    # df['abstract_abstract'] = df['abstract_embed'].apply(lambda x: met.dot(x, df['abstract_embed'][0]))
+    
+    # true_tt, score_tt = met.multi_class(df['group'], df['title_title'])
+    # print(true_tt, score_tt)
 
-    # df1 = df[['group', 'title_title']].sort_values(by='title_title', ascending=False).reset_index(drop=True)
-    # df2 = df[['group', 'abstract_title']].sort_values(by='abstract_title', ascending=False).reset_index(drop=True)
-    # df3 = df[['group', 'abstract_abstract']].sort_values(by='abstract_abstract', ascending=False).reset_index(drop=True)
-    # df1.columns = ['group_t_t', 'title_title']
-    # df2.columns = ['group_a_t', 'abstract_title']
-    # df3.columns = ['group_a_a', 'abstract_abstract']
-    # combined = pd.concat([df1, df2, df3], axis=1)
-    # print(combined.to_string(index=False))
+    print('at')
+    df['abstract_title'] = df['title_embed'].apply(lambda x: met.dot(x, df['abstract_embed'][0]))
+    print('aa')
+    df['abstract_abstract'] = df['abstract_embed'].apply(lambda x: met.dot(x, df['abstract_embed'][0]))
 
+    df1 = df[['group', 'title_title']].sort_values(by='title_title', ascending=False).reset_index(drop=True)
+    df2 = df[['group', 'abstract_title']].sort_values(by='abstract_title', ascending=False).reset_index(drop=True)
+    df3 = df[['group', 'abstract_abstract']].sort_values(by='abstract_abstract', ascending=False).reset_index(drop=True)
+    df1.columns = ['group_t_t', 'title_title']
+    df2.columns = ['group_a_t', 'abstract_title']
+    df3.columns = ['group_a_a', 'abstract_abstract']
+    combined = pd.concat([df1, df2, df3], axis=1)
+    # combined.to_csv('.\\results\\similarity.csv')
+    print(combined.to_string(index=False))
+    
     # print(accuracy, precision, recall, f1)
 
 
@@ -110,10 +112,10 @@ def lang_similarity_en_rs():
     # print(df)
 
 if __name__ == "__main__":
+    compare_paper_to_citations()
     # save_paper_lang()
-    lang_similarity_en_rs()
+    # lang_similarity_en_rs()
     # abstract_en = scrif.get_infom_paper('https://www.infom.org.rs/index.php/infom/', 2695, 'en_US')[1]
     # print(abstract_en)
-    # compare_paper_to_citations()
     0
     

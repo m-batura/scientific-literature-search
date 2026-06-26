@@ -7,7 +7,7 @@ def dot(vector1, vector2):
     return np.dot(vector1, vector2)
 
 def single_class(group, score):
-    true = (group == 1).astype(int)
+    true = (group == 3).astype(int)
     top5_idx = score.nlargest(5).index
     pred = pd.Series(0, index=score.index)
     pred.loc[top5_idx] = 1
@@ -20,7 +20,7 @@ def multi_class(group, score):
         start = g * 5
         end = (g + 1) * 5
         block_idx = sorted_idx[start:end]
-        pred.loc[block_idx] = g + 1
+        pred.loc[block_idx] = 3 - g
     return group.values, pred.values
 
 

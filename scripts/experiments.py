@@ -40,8 +40,8 @@ def compare_paper_to_citations(paper=0):
     df['title_title'] = df['title_embed'].apply(lambda x: met.dot(x, df['title_embed'][paper]))
 
     # true_tt, score_tt, pred_tt = met.single_class(df['group'], df['title_title'])
-    # true_tt, pred_tt = met.multi_class(df['group'], df['title_title'])
-    # print(met.report(true_tt, pred_tt))
+    true_tt, pred_tt = met.multi_class(df['group'], df['title_title'])
+    print(met.report(true_tt, pred_tt))
     # met.plot_roc(true_tt, score_tt, '.\\results\\tt_roc')
     # met.plot_pr(true_tt, score_tt, '.\\results\\tt_pr')
     # print(met.optimal_thresholds(true_tt, score_tt))
@@ -50,23 +50,21 @@ def compare_paper_to_citations(paper=0):
     df['abstract_title'] = df['title_embed'].apply(lambda x: met.dot(x, df['abstract_embed'][paper]))
 
     # true_at, score_at, pred_at = met.single_class(df['group'], df['abstract_title'])
-    # true_at, pred_at = met.multi_class(df['group'], df['abstract_title'])
-    # print(met.report(true_at, pred_at))
+    true_at, pred_at = met.multi_class(df['group'], df['abstract_title'])
+    print(met.report(true_at, pred_at))
     # met.plot_roc(true_at, score_at, '.\\results\\at_roc')
     # met.plot_pr(true_at, score_at, '.\\results\\at_pr')
     # print(met.optimal_thresholds(true_at, score_at))
-    # print(met.report(true_at, pred_at))
 
     print('aa')
     df['abstract_abstract'] = df['abstract_embed'].apply(lambda x: met.dot(x, df['abstract_embed'][paper]))
 
     # true_aa, score_aa, pred_aa = met.single_class(df['group'], df['abstract_abstract'])
-    # true_aa, pred_aa = met.multi_class(df['group'], df['abstract_abstract'])
-    # print(met.report(true_aa, pred_aa))
+    true_aa, pred_aa = met.multi_class(df['group'], df['abstract_abstract'])
+    print(met.report(true_aa, pred_aa))
     # met.plot_roc(true_aa, score_aa, '.\\results\\aa_roc')
     # met.plot_pr(true_aa, score_aa, '.\\results\\aa_pr')
     # print(met.optimal_thresholds(true_aa, score_aa))
-    # print(met.report(true_aa, pred_aa))
 
     df1 = df[['group', 'id', 'title_title']].sort_values(by='title_title', ascending=False).reset_index(drop=True)
     df2 = df[['group', 'id', 'abstract_title']].sort_values(by='abstract_title', ascending=False).reset_index(drop=True)
@@ -75,7 +73,7 @@ def compare_paper_to_citations(paper=0):
     df2.columns = ['group_a_t', 'id', 'abstract_title']
     df3.columns = ['group_a_a', 'id', 'abstract_abstract']
     combined = pd.concat([df1, df2, df3], axis=1)
-    # combined.to_csv(path_or_buf='.\\results\\similarity2.csv', index=False, float_format="%.4f")
+    # combined.to_csv(path_or_buf='.\\results\\similarity3.csv', index=False, float_format="%.4f")
     print(combined.to_string(index=False))
 
 def lang_similarity_en_ru_kz(journal, id):
@@ -117,19 +115,20 @@ def lang_similarity_en_rs():
     diff_matrix = dot_en_en - dot_en_rs   
     avg_diff = diff_matrix.mean(axis=0)   
     for idx, id_val in enumerate(df['id']):
-        results.append((id_val, ))
-        results[id_val] = avg_diff[idx]
+        results.append((id_val, avg_diff[idx]))
     return results
     # df['similarity_en'] = df['embed_en'].apply(lambda x: met.dot(x, df['embed_en'][0]))
     # df['similarity_rs'] = df['embed_rs'].apply(lambda x: met.dot(x, df['embed_en'][0]))
     # df['difference'] = df['similarity_en'] - df['similarity_rs']
-    # print(df)
+    # print(df[['similarity_en', 'similarity_rs', 'difference']].to_string(index=False, float_format="%.4f"))
 
 if __name__ == "__main__":
     # save_paper_citations()
-    compare_paper_to_citations()
+    # compare_paper_to_citations(10)
     # save_paper_lang()
-    # lang_similarity_en_rs()
+    print('id,distance')
+    for id, distance in lang_similarity_en_rs():
+        print(f"{id},{distance:.4f}")
     # abstract_en = scrif.get_infom_paper('https://www.infom.org.rs/index.php/infom/', 2695, 'en_US')[1]
     # print(abstract_en)
     0

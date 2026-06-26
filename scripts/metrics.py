@@ -36,6 +36,9 @@ def recall(true, pred):
 def f1(true, pred):
     return skl.f1_score(true, pred)
 
+def report(true, pred):
+    return skl.classification_report(true, pred)
+
 def plot_roc(true, score, filename=".\\results\\roc_curve.svg"):
     fpr, tpr, thresholds = skl.roc_curve(true, score)
     roc_auc = skl.auc(fpr, tpr)
@@ -58,6 +61,7 @@ def plot_pr(true, score, filename=".\\results\\pr_curve.svg"):
 
     plt.figure()
     plt.plot(recall, precision, color="green", label=f"PR curve (AP = {ap:.2f})")
+    plt.plot([0, 1], [1, 0], color="gray", linestyle="--")
     plt.xlabel("Recall")
     plt.ylabel("Precision")
     plt.title("Precision-Recall Curve")
@@ -78,4 +82,4 @@ def optimal_thresholds(true, score):
     best_f1_idx = np.argmax(f1_scores)
     best_f1_threshold = pr_thresholds[best_f1_idx] if best_f1_idx < len(pr_thresholds) else 1.0
 
-    return best_j_threshold, best_f1_threshold
+    return f'j: {best_j_threshold}, f1: {best_f1_threshold}'
